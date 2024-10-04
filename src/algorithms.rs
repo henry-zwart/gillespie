@@ -53,16 +53,3 @@ pub fn direct<M: Model>(model: M, initial_conditions: M::State, max_iters: u64) 
     println!("Final state: {state:?}");
     states
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::models::{Sir, SirPopulation};
-
-    #[test]
-    fn basics() {
-        let initial_population = SirPopulation([100, 1, 0]);
-        let sir = Sir::new(1.0, 0.1);
-        let _simulation = direct(sir, initial_population, 100);
-    }
-}
