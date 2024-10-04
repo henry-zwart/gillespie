@@ -1,60 +1,68 @@
 use rand::Rng;
 
-use crate::model::{InfectionModel, Population, Update};
+use crate::models::Model;
 
-pub fn direct<M: Population + Update + InfectionModel>(mut model: M) {
+fn is_zero(x: f64) -> bool {
+    (x - 0.0).abs() < f64::EPSILON
+}
+
+pub fn direct<M: Model>(model: M, initial_conditions: M::State, max_iters: u64) -> Vec<M::State> {
     let mut rng = rand::thread_rng();
-    let n_iters = 1_000_000;
-
     let mut time = 0.0;
 
-    let mut completed_iters = 0;
-    for _ in 1..=n_iters {
-        let rates = model.rates();
-        let mut total_rate = None;
-        for r in &rates {
-            if let Some(rate) = r {
-                total_rate = Some(total_rate.unwrap_or(0.0) + rate)
-            }
-        }
-        if total_rate == None {
+    let mut finished_iters = 0;
+    let mut state = initial_conditions;
+    let mut states = vec![state];
+    for _ in 1..=max_iters {
+        let rate_total: f64 = model.rates(&state).sum();
+        let rates = model.rates(&state);
+
+        // End sim. if all rates are zero
+        if is_zero(rate_total) {
             break;
         }
-        let total_rate = total_rate.unwrap();
-        let rand1: f64 = rng.gen();
-        let time_till_next = (-1.0 * rand1.ln()) / total_rate;
 
-        // Find next event
-        let p: f64 = total_rate * rng.gen::<f64>();
-        let event = model.event_by_index(
+        // Sample time till next event
+        let r1: f64 = rng.gen();
+        let time_till_event = -1.0 * r1.ln() / rate_total;
+
+        // Sample next event type
+        let event = M::get_event({
+            // Choose some point between 0 and the total rate
+            let r2: f64 = rng.gen();
+            let p = r2 * rate_total;
+
+            // Figure out which event idx this corresponds to
             &rates
-                .iter()
-                .scan(0.0, |state, &x| {
-                    *state += x.unwrap_or(0.0);
+                .scan(0.0, |state, x| {
+                    *state += x;
                     Some(*state)
                 })
                 .position(|x| x >= p)
-                .expect("some event happens"),
-        );
+                .expect("event rates add to rate_total")
+        });
 
-        model = model.update(event);
-        time += time_till_next;
-        completed_iters += 1;
+        // Perform the update
+        state = model.update(&state, &event);
+        time += time_till_event;
+        finished_iters += 1;
+        states.push(state);
     }
 
-    println!("Time elapsed: {time:?} days ({completed_iters:?} iters)");
-    println!("Model state: {model:?}");
+    println!("Time elapsed: {time:?} ({finished_iters:?} iters)");
+    println!("Final state: {state:?}");
+    states
 }
 
 #[cfg(test)]
 mod test {
-    pub use super::*;
-    pub use crate::model::*;
+    use super::*;
+    use crate::models::{Sir, SirPopulation};
 
     #[test]
-    fn sir() {
-        let sir = Sir::new(1000000, 1, 0, 1.0, 0.1);
-        direct(sir);
-        assert!(false);
+    fn basics() {
+        let initial_population = SirPopulation([100, 1, 0]);
+        let sir = Sir::new(1.0, 0.1);
+        let _simulation = direct(sir, initial_population, 100);
     }
 }

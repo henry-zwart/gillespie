@@ -1,5 +1,5 @@
 pub mod algorithms;
-pub mod model;
+pub mod models;
 
 pub fn add(left: u64, right: u64) -> u64 {
     left + right
