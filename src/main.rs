@@ -21,7 +21,7 @@ struct Cli {
 #[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
 enum Algorithm {
     Direct,
-    FirstResponse,
+    FirstReaction,
 }
 
 #[derive(Clone, Debug, PartialEq, PartialOrd, Subcommand)]
@@ -65,6 +65,8 @@ fn main() {
 
     let _result = match cli.algorithm {
         Algorithm::Direct => algorithms::direct(model, population, cli.max_iters, &cli.time_unit),
-        _ => panic!(),
+        Algorithm::FirstReaction => {
+            algorithms::first_reaction(model, population, cli.max_iters, &cli.time_unit)
+        }
     };
 }
