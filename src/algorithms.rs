@@ -6,7 +6,17 @@ fn is_zero(x: f64) -> bool {
     (x - 0.0).abs() < f64::EPSILON
 }
 
-pub fn direct<M: Model>(model: M, initial_conditions: M::State, max_iters: u64) -> Vec<M::State> {
+pub fn direct<M: Model>(
+    model: M,
+    initial_conditions: M::State,
+    max_iters: u64,
+    time_unit: &str,
+) -> Vec<M::State> {
+    println!("Gillespie's Direct algorithm");
+    println!("Max iters: {max_iters:?}");
+    println!("Model: {model:?}");
+    println!("Initial population: {initial_conditions:?}");
+
     let mut rng = rand::thread_rng();
     let mut time = 0.0;
 
@@ -49,7 +59,7 @@ pub fn direct<M: Model>(model: M, initial_conditions: M::State, max_iters: u64) 
         states.push(state);
     }
 
-    println!("Time elapsed: {time:?} ({finished_iters:?} iters)");
+    println!("Time elapsed: {time:.2?} {time_unit} ({finished_iters:?} iters)");
     println!("Final state: {state:?}");
     states
 }
