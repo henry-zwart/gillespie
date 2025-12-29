@@ -17,12 +17,14 @@ impl From<[u64; 3]> for SirPopulation {
     }
 }
 
+#[derive(Debug)]
 pub enum SirCompartment {
     Susceptible,
     Infected,
     Recovered,
 }
 
+#[derive(Debug)]
 pub enum SirEvent {
     Transmission(f64),
     Recovery(f64),

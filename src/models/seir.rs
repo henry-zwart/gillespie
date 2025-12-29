@@ -19,6 +19,7 @@ impl From<[u64; 4]> for SeirPopulation {
     }
 }
 
+#[derive(Debug)]
 pub enum SeirCompartment {
     Susceptible,
     Exposed,
@@ -26,6 +27,7 @@ pub enum SeirCompartment {
     Recovered,
 }
 
+#[derive(Debug)]
 pub enum SeirEvent {
     Transmission(f64),
     Infectious(f64),

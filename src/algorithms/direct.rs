@@ -13,7 +13,7 @@ pub fn direct<M: Model + Debug>(
     println!("Gillespie's direct algorithm");
     println!("Max iters: {max_iters:?}");
     println!("Model: {model:?}");
-    println!("Initial population: {initial_conditions:?}");
+    println!("Initial population: {initial_conditions:?}\n");
 
     let mut rng = rand::thread_rng();
     let mut time = 0.0;
@@ -32,6 +32,8 @@ pub fn direct<M: Model + Debug>(
 
         // Sample time till next event
         let time_till_event = sample_exponential(rate_total, &mut rng).expect("nonzero rate_total");
+
+        
 
         // Sample next event type
         let event = events
@@ -52,14 +54,20 @@ pub fn direct<M: Model + Debug>(
             })
             .unwrap();
 
+        // println!("Next event: {event:?}");
+        // println!("Time till event: {time_till_event:.3?} days");
+        // println!();
+
         // Perform the update
         state = model.update(&state, event);
         time += time_till_event;
         finished_iters += 1;
         states.push(state);
+
+        // println!("{state:?}");
     }
 
-    println!("Time elapsed: {time:.2?} {time_unit} ({finished_iters:?} iters)");
+    println!("\nTime elapsed: {time:.2?} {time_unit} ({finished_iters:?} iters)");
     println!("Final state: {state:?}");
     states
 }

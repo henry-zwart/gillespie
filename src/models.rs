@@ -11,7 +11,7 @@ pub trait ModelEvent {
 
 pub trait Model {
     type State: Debug + Clone + Copy;
-    type Event: ModelEvent;
+    type Event: ModelEvent + Debug;
 
     fn events(&self, state: &Self::State) -> impl Iterator<Item = Self::Event>;
 
